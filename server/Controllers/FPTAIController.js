@@ -5,7 +5,7 @@ const taskMap = new Map(); // biến đánh dấu trạng thái sync
 exports.getMP3 = async (req,res) =>{
   const data = await FPT_AI_API.FPT_TTS(req.body.text, req.body.fileID)
   console.log(data)
-  // const result = await waitForCallback(data)
+  const result = await waitForCallback(data)
   res.status(200).json({"mp3":data})
 }
 

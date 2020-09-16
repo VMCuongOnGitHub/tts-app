@@ -1,8 +1,9 @@
 <template>
-  <div id="speech-editor">
-    <h3>{{word}}</h3>
+  <div id="speech-editor" style="margin-top:20px">
+    <h6 class="text-left">{{word}}</h6>
     <input type="text" placeholder="Read as" v-model="wordReadAs"/>
-    <button v-on:click="readAs(wordID, wordReadAs, fileID)">Change</button>
+    <button v-on:click="readAs(wordID, wordReadAs, fileID)">{{buttonChangeTitle}}</button>
+    <button v-on:click="removeReadAs()">Remove</button>
   </div>
 </template>
 
@@ -15,7 +16,8 @@ export default {
         wordID: this.$attrs.wordID,
         word: this.$attrs.word,
         wordReadAs: this.wordReadAs,
-        fileID : this.$attrs.fileID
+        fileID : this.$attrs.fileID,
+        buttonChangeTitle: "Change"
       }
     },
     methods:{
@@ -25,13 +27,7 @@ export default {
           wordReadAs: wordReadAs,
           fileID: fileID
         })
-        axios.post(`http://localhost:3000/saveModel`,{
-          fileID: fileID,
-          word: this.word,
-          readAs: wordReadAs
-        }).then(()=>{
-          console.log('hello')
-        })
+        this.buttonChangeTitle = "Unchange"
       }
     }
 }

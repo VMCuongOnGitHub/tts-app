@@ -8,6 +8,10 @@ import store from './store/store'
 import { BootstrapVue,BootstrapVueIcons } from 'bootstrap-vue'
 import Vuex from 'vuex'
 
+import AudioVisual from 'vue-audio-visual'
+
+Vue.use(AudioVisual)
+
 
 import 'bootstrap-vue/dist/bootstrap-vue-icons.min.css'
 Vue.use(Vuex)
