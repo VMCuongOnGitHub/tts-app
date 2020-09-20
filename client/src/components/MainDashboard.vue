@@ -25,10 +25,10 @@
           </div>
         </div>
         <div class="col-md-8">
-          <div style="height: 60px">
+          <!-- <div style="height: 60px">
             <h6 style="float:left;margin: 20px 0px 20px 5px">Content:</h6>
             <input v-model="valueSearch" v-on:change="onChangedSearch()" type="text" placeholder="Search Text" id="keyword-input" />
-          </div>
+          </div> -->
 
           <div>
             <div class="card" id="maker">
@@ -40,14 +40,14 @@
                 </div>
               </div>
 
-              <audio controls ref="foo" src="voicerecord">
+              <audio controls ref="foo" :src=voicerecord>
               </audio>
               <h1>hello</h1>
               <av-waveform
                 ref-link="foo"
                 :audio-controls="true"
                 :playtime-clickable="true"
-                :canv-class="800"
+                :canv-width="800"
                 :canv-height="200"
               />
 
@@ -65,11 +65,11 @@
       </div>
     </div>
 
-    <!-- <b-modal id="modal-spinner" title="BootstrapVue" hide-footer hide-header no-close-on-backdrop no-close-on-esc >
+    <b-modal id="modal-spinner" title="BootstrapVue" hide-footer hide-header no-close-on-backdrop no-close-on-esc >
       <div>
         <b-spinner label="Loading..."></b-spinner>
       </div>
-    </b-modal> -->
+    </b-modal>
   </div>
 </template>
 
@@ -117,8 +117,8 @@ export default {
 
       if(selection_text !== "" && selection_text !== " "){
         this.$store.dispatch('addTextToSpeechEditor',{
-        word : selection_text,
-        wordID: genID
+          word : selection_text,
+          wordID: genID
       }).then(response => {
           let span = document.createElement('SPAN');
           span.style.cssText = "background-color: #1d6bdf; height:20px"
@@ -148,32 +148,57 @@ export default {
     sendRequest(){
       var itemsProcessed = 0
       this.wordList = this.$store.getters.getWordList
-
-      this.wordList.forEach(element => {
-        console.log(element.readAs)
-        axios.post('http://localhost:3000/saveModel',{
-          fileID: this.fileID,
-          word: element.word,
-          readAs: element.readAs
+      if(this.wordList.length > 0){
+        this.wordList.forEach(element => {
+          console.log(element.readAs)
+          axios.post('http://localhost:3000/saveModel',{
+            fileID: this.fileID,
+            word: element.word,
+            readAs: element.readAs
+          })
+          itemsProcessed++
+          if(itemsProcessed == this.wordList.length){
+            axios.post('http://localhost:3000/getMP3',{
+              text: this.textInput,
+              fileID: this.fileID
+            })
+            .then( response => {
+              this.voicerecord = response.data.mp3
+              // alert(this.voicerecord)
+              this.isReady = true
+              this.$bvModal.hide('modal-spinner')
+            })
+            .catch(e => {
+              this.errors.push(e)
+            })
+          }
         })
-        itemsProcessed++
-        if(itemsProcessed == this.wordList.length){
-          axios.post('http://localhost:3000/getMP3',{
-            text: this.textInput,
-            fileID: this.fileID
-          })
-          .then( response => {
-            // setTimeout(this.getVoice(response.data.mp3), 1000)
-            this.getVoice(response.data.mp3)
-            this.isReady =  true
-          })
-          .catch(e => {
-            // setTimeout(this.getVoice(response.data.mp3), 1000)
-            this.getVoice(response.data.mp3)
-            console.log(e)
-          })
-        }
-      })
+      }else{
+        axios.post('http://localhost:3000/getMP3',{
+              text: this.textInput,
+              fileID: this.fileID
+            })
+            .then( response => {
+
+              axios.post('http://localhost:3000/callbackurl',{
+                message: response.data.mp3,
+                success: "true"
+              }).then( response => {
+                this.voicerecord = response.data.mp3
+                alert(this.voicerecord)
+                this.isReady = true
+                this.$bvModal.hide('modal-spinner')
+              }).catch(error => {
+                this.errors.push(error)
+              })
+
+            })
+            .catch(e => {
+              this.errors.push(e)
+            })
+      }
+
+
     }
 
   }

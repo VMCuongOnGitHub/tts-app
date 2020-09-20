@@ -31,6 +31,7 @@ exports.FPT_TTS = (text, fileID) => {
 }
 
 
+
 exports.FPT_DICT_TTS = (fileID, word, readAs) => {
   return promise = new Promise((resolve,reject)=>{
     const options = {
@@ -44,6 +45,31 @@ exports.FPT_DICT_TTS = (fileID, word, readAs) => {
         'model' : fileID,
         'text' : word,
         'pronounce' : readAs
+      },
+      json: true
+    }
+    rq(options, (err, res, body) => {
+      if(err) {
+        console.log("error")
+        reject(err)
+      } else {
+        let data = res.body
+        data = data.message
+        resolve(data)
+      }
+    })
+
+  })
+}
+
+exports.FPT_CALLBACK_URL = (message, success) => {
+  return promise = new Promise((resolve,reject)=>{
+    const options = {
+      url: process.env.CALLBACK_URL,
+      method: 'POST',
+      body: {
+        'message': message,
+        'success': success
       },
       json: true
     }

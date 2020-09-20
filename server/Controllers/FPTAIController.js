@@ -6,6 +6,7 @@ exports.getMP3 = async (req,res) =>{
   const data = await FPT_AI_API.FPT_TTS(req.body.text, req.body.fileID)
   console.log(data)
   const result = await waitForCallback(data)
+  console.log(result)
   res.status(200).json({"mp3":data})
 }
 
@@ -15,38 +16,36 @@ exports.saveModel = (req,res) =>{
 }
 
 const waitForCallback = (taskId) => { // hàm trung gian
-    console.log("start waitForCallback")
-    return new Promise((resolve, reject) => {
-        const task = {};
-        task.id = taskId; // khai báo biến này để check trạng thái
-        task.onComplete = (data) => { // resolved
-            resolve(data);
-            console.log("Resolved process")
-        };
-        task.onError = (e) => {
-            console.log(e)
-            reject()
-        };
-        taskMap.set(task.id, task); // set taskMap để đợi đến khi callBackUrl xong
-    });
+  console.log("start waitForCallback")
+  return new Promise((resolve, reject) => {
+    const task = {}
+    task.id = taskId // khai báo biến này để check trạng thái
+
+    task.onComplete = (data) => { // resolved
+        resolve(data)
+        console.log("Resolved process")
+    }
+    task.onError = () => {
+        reject();
+    }
+    taskMap.set(task.id, task); // set taskMap để đợi đến khi callBackUrl xong
+  });
 };
 
 exports.CallBackUrl = (req,res) =>{
   console.log("CallBackUrl is called")
   let result;
   let taskId = req.body.message
-  if(req.body.success == true) {
-      //success == true => file MP3 đã sẵn sàng
-      result = "solved"
-  }else result = "rejected"
+
+  if(req.body.success == "true") {
+    //success == true => file MP3 đã sẵn sàng
+    result = "solved"
+    console.log("solve")
+  } else result = "rejected"
   //báo complete để trả về resolve cho waitForCallback
   console.log("Received Callback")
   taskMap.get(taskId).onComplete(result);
   console.log("Completed Callback")
   //clean
   taskMap.delete(taskId);
-}
-
-exports.getMp3WithTimestamp = (req,res) =>{
-
 }
