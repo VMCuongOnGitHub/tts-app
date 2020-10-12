@@ -25,10 +25,10 @@
           </div>
         </div>
         <div class="col-md-8">
-          <!-- <div style="height: 60px">
-            <h6 style="float:left;margin: 20px 0px 20px 5px">Content:</h6>
-            <input v-model="valueSearch" v-on:change="onChangedSearch()" type="text" placeholder="Search Text" id="keyword-input" />
-          </div> -->
+          <div style="height: 60px">
+            <h6 style="float:left;margin: 20px 0px 20px 5px">Word: {{wordCount}}</h6>
+            <!-- <input v-model="valueSearch" v-on:change="onChangedSearch()" type="text" placeholder="Search Text" id="keyword-input" /> -->
+          </div>
 
           <div>
             <div class="card" id="maker">
@@ -99,9 +99,16 @@ export default {
       highlightEnabled: true,
       wordList: this.$store.getters.getWordList,
       fileID: '',
+      wordCount:0
     }
   },
   methods:{
+    countWords(str) {
+      str = str.replace(/(^\s*)|(\s*$)/gi,"");
+      str = str.replace(/[ ]{2,}/gi," ");
+      str = str.replace(/\n /,"\n");
+      return str.split(' ').length;
+    },
     onChangedSearch(value)
     {
       let randomColor = 'background-color:#'+(Math.random()*0xFFFFFF<<0).toString(16);
@@ -136,6 +143,7 @@ export default {
     onChangedTextArea(){
       let genID = Date.now().toString()
       this.fileID = genID
+      this.wordCount = this.countWords(this.textInput)
     },
     getVoice(voiceResponse){
       let interval = setInterval(() => {
@@ -148,6 +156,7 @@ export default {
     sendRequest(){
       var itemsProcessed = 0
       this.wordList = this.$store.getters.getWordList
+
       if(this.wordList.length > 0){
         this.wordList.forEach(element => {
           console.log(element.readAs)
